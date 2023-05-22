@@ -32,24 +32,36 @@ function CalendarApp(props) {
   };
 
   const getDate = async () => {
-    if (props?.state?.events.length == 0) {
+    if (props?.state?.events.length === 0) {
       const response = await fetch("https://MongooseAPI.erenyea.repl.co/get");
       const post = await response.json();
-      console.log(post);
+      console.log('POST', post);
       if (post.success === true) {
         const senddata = post?.data?.map((i) => {
           var d = i;
           d.start = new Date(i?.start);
           d.end = new Date(i?.end);
           d.id = i?._id;
-
+  
           return d;
         });
-        props?.setState({ events: senddata });
+        console.log('here', senddata)
+        // Filter out events outside the time range
+        const filteredData = senddata.filter((event) => {
+          const startHour = event.start.getHours();
+          const endHour = event.end.getHours();
+          const startDate = event.start.getDate();
+          const endDate = event.end.getDate();
+  
+          return startDate === endDate && startHour >= 8 && endHour < 18;
+        });
+  
+        console.log('filter', filteredData)
+  
+        props?.setState({ events: filteredData });
       }
     }
   };
-
   const getMonth = async () => {
     if (monthevent.length == 0) {
       const response = await fetch(
